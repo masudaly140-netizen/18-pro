@@ -1,0 +1,33 @@
+name: Build Camera 18 Pro APK
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Extract project ZIP
+        run: |
+          unzip -q 18-pro.zip -d extracted
+          find extracted -name gradlew -type f
+
+      - name: Build Android APK
+        run: |
+          PROJECT_DIR="$(dirname "$(find extracted -name gradlew -type f | head -n 1)")"
+          cd "$PROJECT_DIR"
+          chmod +x gradlew
+          ./gradlew assembleDebug
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: Camera-18-Pro-APK
+          path: extracted/**/build/outputs/apk/debug/*.apk
