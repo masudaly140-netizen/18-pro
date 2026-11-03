@@ -11,22 +11,27 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
+      - name: Download project files
         uses: actions/checkout@v4
 
-      - name: Extract project ZIP
+      - name: Extract ZIP
         run: |
-          unzip -q 18-pro.zip -d extracted
+          unzip -q Camera-18-Pro-Android-Project.zip -d extracted
           find extracted -name gradlew -type f
 
-      - name: Build Android APK
+      - name: Build APK
         run: |
-          PROJECT_DIR="$(dirname "$(find extracted -name gradlew -type f | head -n 1)")"
+          GRADLEW=$(find extracted -name gradlew -type f | head -n 1)
+          if [ -z "$GRADLEW" ]; then
+            echo "Gradle wrapper nahi mila. ZIP project check karein."
+            exit 1
+          fi
+          PROJECT_DIR=$(dirname "$GRADLEW")
           cd "$PROJECT_DIR"
           chmod +x gradlew
           ./gradlew assembleDebug
 
-      - name: Upload APK
+      - name: Save APK
         uses: actions/upload-artifact@v4
         with:
           name: Camera-18-Pro-APK
